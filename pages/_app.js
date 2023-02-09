@@ -1,17 +1,28 @@
+const isServer = typeof window === "undefined";
+const isMockingEnabled = process.env.NEXT_PUBLIC_API_MOCKING === "enabled";
+
 export const requestInterceptor =
-  process.env.NEXT_PUBLIC_ENABLE_MSW === "true" && typeof window === "undefined"
+  isMockingEnabled && isServer
     ? (async () => {
         const { setupServer } = await import("msw/node");
         const { handlers } = await import("../tests/handlers");
-        const requestInterceptor = setupServer(...handlers);
+        const server = setupServer(...handlers);
 
-        requestInterceptor.listen({
+        server.listen({
           onUnhandledRequest: "warn",
         });
 
-        return requestInterceptor;
+        return server;
       })()
     : undefined;
+
+if (isMockingEnabled && !isServer) {
+  async function initWorker() {
+    const { worker } = await import("../tests/worker");
+    worker.start();
+  }
+  // initWorker();
+}
 
 export default function App({ Component, pageProps }) {
   return <Component {...pageProps} />;

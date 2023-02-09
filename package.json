@@ -18,5 +18,8 @@
   "devDependencies": {
     "@playwright/test": "^1.30.0",
     "playwright-msw": "^2.2.0"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

@@ -1,11 +1,11 @@
 import { test as base, expect } from "@playwright/test";
 import { createWorkerFixture } from "playwright-msw";
-import { handlers } from "./handlers";
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
 import path from "path";
 import { rest } from "msw";
+import { handlers } from "./handlers";
 
 const test = base.extend({
   worker: createWorkerFixture(handlers),
@@ -23,6 +23,7 @@ const test = base.extend({
       const server = await new Promise((resolve) => {
         const server = createServer((req, res) => {
           const parsedUrl = parse(req.url, true);
+
           handle(req, res, parsedUrl);
         });
 
@@ -43,7 +44,8 @@ const test = base.extend({
   requestInterceptor: [
     async ({}, use) => {
       const { requestInterceptor } = await import("../.next/server/pages/_app");
-      await use(requestInterceptor);
+      const interceptor = await requestInterceptor;
+      await use(interceptor);
     },
     {
       scope: "worker",

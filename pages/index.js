@@ -1,7 +1,9 @@
 import { useState } from "react";
 
+const API_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function Home({ serverData }) {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(serverData);
 
   const handleGetData = () => {
     fetch("/api/gateway/info/")
@@ -17,13 +19,14 @@ export default function Home({ serverData }) {
   );
 }
 
-// export async function getServerSideProps() {
-//   const res = await fetch(`https://jsonkeeper.com/b/AFRW`);
-//   const serverData = await res.json();
+export async function getServerSideProps() {
+  const serverData = await fetch("https://api.qogita.com/info/").then(
+    (response) => response.json()
+  );
 
-//   return {
-//     props: {
-//       serverData,
-//     },
-//   };
-// }
+  return {
+    props: {
+      serverData,
+    },
+  };
+}

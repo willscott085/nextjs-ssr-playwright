@@ -3,7 +3,7 @@ const isMockingEnabled = process.env.NEXT_PUBLIC_API_MOCKING === "enabled";
 
 export const requestInterceptor =
   isMockingEnabled && isServer
-    ? (async () => {
+    ? (async function () {
         const { setupServer } = await import("msw/node");
         const { handlers } = await import("../tests/handlers");
         const server = setupServer(...handlers);
@@ -21,7 +21,7 @@ if (isMockingEnabled && !isServer) {
     const { worker } = await import("../tests/worker");
     worker.start();
   }
-  // initWorker();
+  initWorker();
 }
 
 export default function App({ Component, pageProps }) {

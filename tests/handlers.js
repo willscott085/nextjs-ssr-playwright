@@ -10,11 +10,11 @@ export const handlers = [
   //     })
   //   )
   // ),
-  rest.get("https://api.qogita.com/info/", (_req, res, ctx) =>
-    res(
-      ctx.json({
-        inventoryValueCurrency: "Node -> Canary",
-      })
-    )
-  ),
+  // rest.get("https://api.test.qogita.com/info", (_req, res, ctx) =>
+  //   res(
+  //     ctx.json({
+  //       inventoryValueCurrency: "Node -> Canary",
+  //     })
+  //   )
+  // ),
 ];

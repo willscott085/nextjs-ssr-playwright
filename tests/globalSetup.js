@@ -1,5 +1,6 @@
 const path = require("path");
 const cli = require("next/dist/cli/next-build");
+const fs = require("fs");
 
 async function globalSetup() {
   if (process.env.SKIP_BUILD === "1") {

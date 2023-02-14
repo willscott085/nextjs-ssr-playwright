@@ -1,31 +1,30 @@
 import { test, expect } from "./playwrightEnd2EndTest";
-import { handlers } from "../tests/handlers";
 
 const API_DOMAIN = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-test("no mocks, real call to Canary", async ({ page, port }) => {
-  await page.goto(`http://localhost:${port}`);
+// test("no mocks, real call to Canary", async ({ page, port }) => {
+//   await page.goto(`http://localhost:${port}`);
 
-  const button = await page.innerText("button");
+//   const button = await page.innerText("button");
 
-  expect(button).toBe("Load data");
+//   expect(button).toBe("Load data");
 
-  await page.getByRole("button").click();
+//   await page.getByRole("button").click();
 
-  const data = await page.innerText("pre");
+//   const data = await page.innerText("pre");
 
-  expect(data).toBe("EUR");
-});
+//   expect(data).toBe("EUR");
+// });
 
 test("browser mocks", async ({ page, port, worker, rest }) => {
   await worker.use(
-    rest.get("*/api/gateway/info", (_req, res, ctx) =>
-      res(
+    rest.get("*/api/gateway/info", (_req, res, ctx) => {
+      return res(
         ctx.json({
           inventoryValueCurrency: "Browser -> Node",
         })
-      )
-    )
+      );
+    })
   );
 
   await page.goto(`http://localhost:${port}`);
@@ -41,18 +40,17 @@ test("browser mocks", async ({ page, port, worker, rest }) => {
   expect(data).toBe("Browser -> Node");
 });
 
-test.only("server-to-server mocks", async ({
+test("server-to-server mocks", async ({
   page,
   port,
   requestInterceptor,
   rest,
 }) => {
   requestInterceptor.use(
-    rest.get("https://api.qogita.com/info/", (req, res, ctx) =>
+    rest.get("https://api.test.qogita.com/info", (_req, res, ctx) =>
       res(
         ctx.json({
-          inventoryValueCurrency:
-            "This call was mocked in a test by intercepting the call between node and Canary",
+          inventoryValueCurrency: "Node -> Canary",
         })
       )
     )

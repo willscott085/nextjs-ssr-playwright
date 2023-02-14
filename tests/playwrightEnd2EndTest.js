@@ -1,10 +1,10 @@
-import { test as base, expect } from "@playwright/test";
-import { createWorkerFixture } from "playwright-msw";
-import { createServer } from "http";
+import { expect, test as base } from "@playwright/test";
+import http from "http";
 import { parse } from "url";
+import { rest } from "msw";
 import next from "next";
 import path from "path";
-import { rest } from "msw";
+import { createWorkerFixture } from "playwright-msw";
 import { handlers } from "./handlers";
 
 const test = base.extend({
@@ -18,22 +18,23 @@ const test = base.extend({
       });
 
       await app.prepare();
-      const handle = app.getRequestHandler();
+      const handleNextRequests = app.getRequestHandler();
 
-      const server = await new Promise((resolve) => {
-        const server = createServer((req, res) => {
-          const parsedUrl = parse(req.url, true);
+      const customServer = new http.Server(async (req, res) => {
+        const parsedUrl = parse(req.url, true);
+        return handleNextRequests(req, res, parsedUrl);
+      });
 
-          handle(req, res, parsedUrl);
-        });
-
-        server.listen((error) => {
-          if (error) throw error;
-          resolve(server);
+      await new Promise((resolve, reject) => {
+        customServer.listen((err) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(customServer);
         });
       });
 
-      const port = String(server.address().port);
+      const port = String(customServer.address().port);
       await use(port);
     },
     {
@@ -41,6 +42,7 @@ const test = base.extend({
       auto: true,
     },
   ],
+
   requestInterceptor: [
     async ({}, use) => {
       const { requestInterceptor } = await import("../.next/server/pages/_app");
@@ -48,7 +50,7 @@ const test = base.extend({
       await use(interceptor);
     },
     {
-      scope: "worker",
+      scope: "test",
     },
   ],
 
